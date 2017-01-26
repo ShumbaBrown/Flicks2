@@ -25,10 +25,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let nowPlayingNavigationController = storyboard.instantiateViewController(withIdentifier: "MoviesNavigationController") as! UINavigationController
         let nowPlayingViewController = nowPlayingNavigationController.topViewController as! MoviesViewController
         nowPlayingViewController.endpoint = "now_playing"
+        nowPlayingNavigationController.tabBarItem.title = "Now Playing"
         
         let topRatedNavigationController = storyboard.instantiateViewController(withIdentifier: "MoviesNavigationController") as! UINavigationController
         let topRatedViewController = topRatedNavigationController.topViewController as! MoviesViewController
-        topRatedViewController.endpoint = "now_playing"
+        topRatedViewController.endpoint = "top_rated"
+        topRatedNavigationController.tabBarItem.title = "Top Rated"
+        
         
         
         let tabBarController = UITabBarController()
@@ -37,6 +40,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.rootViewController = tabBarController
         window?.makeKeyAndVisible()
         
+        topRatedNavigationController.navigationBar.barStyle = UIBarStyle.black
+        
+        nowPlayingNavigationController.navigationBar.barStyle = UIBarStyle.black
+        
+        tabBarController.tabBar.barStyle = UIBarStyle.black
         
         
         return true
