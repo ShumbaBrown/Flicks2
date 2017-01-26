@@ -19,7 +19,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     var movies: [NSDictionary]?
     var filteredMovies: [NSDictionary]?
     var refreshControl: UIRefreshControl!
-    
+    var endpoint: String!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -63,25 +63,25 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         let movie = filteredMovies![indexPath.row]
         let title = movie["title"] as! String
         let overview = movie["overview"] as! String
-        var posterPath = ""
-        posterPath = movie["poster_path"] as! String
-        
         
         let baseURL = "https://image.tmdb.org/t/p/w500"
-        
-        let imageURL = NSURL(string: baseURL + posterPath)
-        if posterPath == "" {
-            NetworkErrorView.isHidden = false
-            // code to reveal the network error message
-        }
-        else {
+        if let posterPath =  movie["poster_path"] as? String {
+            
+            let imageURL = NSURL(string: baseURL + posterPath)
             cell.moviePoster.alpha = 0.0
             cell.moviePoster.setImageWith(imageURL as! URL)
-        
+            
             UIView.animate(withDuration: 0.6, animations: { () -> Void in
                 cell.moviePoster.alpha = 1.0
             })
         }
+        else {
+            NetworkErrorView.isHidden = false
+            // code to reveal the network error message
+        }
+        
+        
+    
         
         
         cell.titleLabel.text = title
@@ -100,15 +100,15 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         MBProgressHUD.showAdded(to: self.view, animated: true)
         
         let apiKey = "5efd3f2351521121601ddf0b9a208d2e"
-        let url = URL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")!
+        let url = URL(string: "https://api.themoviedb.org/3/movie/\(endpoint)?api_key=\(apiKey)")!
         let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 10)
         let session = URLSession(configuration: .default, delegate: nil, delegateQueue: OperationQueue.main)
         let task: URLSessionDataTask = session.dataTask(with: request) { (data: Data?, response: URLResponse?, error: Error?) in
             if let data = data {
                 if let dataDictionary = try! JSONSerialization.jsonObject(with: data, options: []) as? NSDictionary {
-                    print(dataDictionary)
+                    //print(dataDictionary)
                     
-                    self.movies = dataDictionary["results"] as! [NSDictionary]
+                    self.movies = dataDictionary["results"] as? [NSDictionary]
                     self.filteredMovies = self.movies
                     
                     self.refreshControl.endRefreshing()
@@ -151,6 +151,15 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
         self.searchBar.showsCancelButton = true
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let cell = sender as! UITableViewCell
+        let indexPath = TableView.indexPath(for: cell)
+        let movie = filteredMovies![indexPath!.row]
+        
+        let detailViewController = segue.destination as! DetailViewController
+        detailViewController.movie = movie
     }
     /*
     // MARK: - Navigation
